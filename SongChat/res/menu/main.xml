@@ -5,7 +5,23 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
-    <item android:id="@+id/new_message" android:title="New" android:orderInCategory="1"></item>
-    <item android:id="@+id/refresh" android:title="Refresh" android:orderInCategory="2"></item>
+    <item android:id="@+id/new_message" 
+        android:title="New" 
+        android:orderInCategory="1" 
+        android:icon="@drawable/ic_action_new_email" 
+        android:showAsAction="always">
+    </item>
+    <item android:id="@+id/add_friend" 
+        android:title="Add friend" 
+        android:orderInCategory="2"
+        android:icon="@drawable/ic_action_add_person"
+        android:showAsAction="always">   
+    </item>
+    <item android:id="@+id/refresh" 
+        android:title="Refresh"
+        android:orderInCategory="3" 
+        android:icon="@drawable/ic_action_refresh" 
+        android:showAsAction="always">
+    </item>
 
 </menu>
