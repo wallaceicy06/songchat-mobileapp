@@ -4,5 +4,7 @@
     <string name="app_name">SongChat</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="message">The quick brown fox...</string>
+    <string name="title_activity_song_play">SongPlayActivity</string>
 
 </resources>
