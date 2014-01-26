@@ -27,7 +27,8 @@ public class SongPlayActivity extends YouTubeBaseActivity implements
 	private YouTubePlayer youtubePlayer;
 	private String videoId;
 	private ImageButton playButton;
-	private int startTime = 30000;
+	private int startTime;
+	private int length;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,8 @@ public class SongPlayActivity extends YouTubeBaseActivity implements
 		
 		Intent intent = getIntent();
 		videoId = intent.getStringExtra("vidId");
+		startTime = intent.getIntExtra("startTime", 0);
+		length = intent.getIntExtra("length", 5000);
 
 		playButton = (ImageButton) findViewById(R.id.song_play_button);
 		playButton.setOnClickListener(this);

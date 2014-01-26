@@ -32,18 +32,23 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 public class SongSliceActivity extends YouTubeBaseActivity implements
 		OnInitializedListener, PlayerStateChangeListener,
-		PlaybackEventListener, OnClickListener {
+		PlaybackEventListener, OnClickListener, OnEditorActionListener {
 
 	private String userId;
 	private String[] friends;
@@ -51,13 +56,12 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 	private YouTubePlayer youtubePlayer;
 	private Button toggleEndsButton;
 	private Button reviewButton;
+	private EditText videoUrl;
 	private boolean isStart;
 	private boolean endSelected;
 	private boolean isReviewing;
 	private int startTimeMillis;
 	private int endTimeMillis;
-
-	private String videoId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,15 +74,18 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		isReviewing = false;
 
 		Intent intent = getIntent(); 
-		videoId = intent.getStringExtra("vidId");
 		userId = intent.getStringExtra("userId");
-
+		friends = intent.getStringArrayExtra("friends");
+		
 		toggleEndsButton = (Button) findViewById(R.id.toggle_button);
 		toggleEndsButton.setOnClickListener(this);
 
 		reviewButton = (Button) findViewById(R.id.review_button);
 		reviewButton.setOnClickListener(this);
-
+		
+		videoUrl = (EditText) findViewById(R.id.video_url);
+		videoUrl.setOnEditorActionListener(this);
+		
 		youtubeView = (YouTubePlayerView) findViewById(R.id.slice_player);
 		youtubeView.initialize(MainActivity.DEVELOPER_ID, this);
 	}
@@ -102,14 +109,14 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		}
 	}
 	
-	public void sendMessage(int userIndex) {
+	public void sendMessage(final int userIndex) {
 		Thread trd = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				HttpClient httpClient = new DefaultHttpClient();
 				HttpGet httpGet = new HttpGet(
 						"http://ec2-184-73-80-30.compute-1.amazonaws.com/app2server.php?tx_username="
-								+ userId + "&rx_username=" + "fuck" + "&msg=_" + "&start_time=" + startTimeMillis + "&length=" + (endTimeMillis - startTimeMillis) + "&url=" + videoId);;
+								+ userId + "&rx_username=" + friends[userIndex] + "&msg=_" + "&start_time=" + startTimeMillis + "&length=" + (endTimeMillis - startTimeMillis) + "&url=" + videoUrl.getText().toString());;
 
 				// Making HTTP Request
 				try {
@@ -155,7 +162,6 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		youtubePlayer.setPlaybackEventListener(this);
 		Toast.makeText(this, "Initialization  Success", Toast.LENGTH_LONG)
 				.show();
-		youtubePlayer.cueVideo(videoId);
 	}
 
 	@Override
@@ -174,7 +180,7 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		} else if (view == reviewButton) {
 			if (startTimeMillis < endTimeMillis) {
 				isReviewing = true;
-				youtubePlayer.cueVideo(videoId, startTimeMillis);
+				youtubePlayer.cueVideo(videoUrl.getText().toString(), startTimeMillis);
 			}
 		}
 	}
@@ -317,6 +323,17 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		    });
 		    return builder.create();
 		}
+	}
+
+
+	@Override
+	public boolean onEditorAction(TextView textView, int actionId, KeyEvent event) {
+		 if (actionId == EditorInfo.IME_ACTION_GO) {
+	            if (youtubePlayer != null) {
+	                youtubePlayer.cueVideo(videoUrl.getText().toString());
+	            }
+	        }
+		 return false;
 	}
 
 }

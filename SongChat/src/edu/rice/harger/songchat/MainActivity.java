@@ -30,18 +30,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends Activity implements OnClickListener, OnItemClickListener{
 
 	public static final String DEVELOPER_ID = "AIzaSyB2iYmJiz1VhQH9RqcMOrEy6H4DGgS7n54";
 	
 	private String userId;
 	private ListView listView;
-	private String[] messageList;
+	private String[] friends;
+	private ArrayAdapter<MessageInfo> adapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +54,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_main);
 
 		listView = (ListView) findViewById(R.id.listView1);
-
+	    adapter = new ArrayAdapter<MessageInfo>(this, android.R.layout.simple_list_item_1);
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(this);
+		
 		DialogFragment fragment = LoginDialog.newInstance();
 		fragment.show(getFragmentManager().beginTransaction(), "dialog");
+		
 	}
 
 	@Override
@@ -87,6 +96,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		Intent newMessageIntent = new Intent(this, SongSliceActivity.class);
 		newMessageIntent.putExtra("vidId", "Zuich5TChEM");
 		newMessageIntent.putExtra("userId", userId);
+		newMessageIntent.putExtra("friends", friends);
 		startActivity(newMessageIntent);
 	}
 
@@ -115,6 +125,55 @@ public class MainActivity extends Activity implements OnClickListener {
 					in.close();
 
 					Log.d("New friend Response:", str.toString());
+					populateFriends();
+
+				} catch (ClientProtocolException e) {
+					// writing exception to log
+					e.printStackTrace();
+
+				} catch (IOException e) {
+					// writing exception to log
+					e.printStackTrace();
+				}
+			}
+		});
+		trd.start();
+	}
+	
+	public void populateFriends() {
+		Thread trd = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				HttpClient httpClient = new DefaultHttpClient();
+				HttpGet httpGet = new HttpGet(
+						"http://ec2-184-73-80-30.compute-1.amazonaws.com/get_friends.php?username="
+								+ userId);
+
+				// Making HTTP Request
+				try {
+					HttpResponse response = httpClient.execute(httpGet);
+
+					// writing response to log
+					InputStream in = response.getEntity().getContent();
+					BufferedReader reader = new BufferedReader(
+							new InputStreamReader(in));
+					StringBuilder str = new StringBuilder();
+					String line = null;
+					while ((line = reader.readLine()) != null) {
+						str.append(line);
+					}
+					in.close();
+
+					Log.i("FRIENDS", str.toString());
+					
+					try {
+						final JSONObject json = new JSONObject(str.toString());
+						String allFriends = json.getString("friends");
+						friends = allFriends.split(",");
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+
 
 				} catch (ClientProtocolException e) {
 					// writing exception to log
@@ -156,6 +215,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 					userId = str.toString();
 					Log.d("Http Response:", userId);
+					
+					populateFriends();
 
 				} catch (ClientProtocolException e) {
 					// writing exception to log
@@ -168,11 +229,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 		});
 		trd.start();
-	}
-
-	public void populateMessageList() {
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, messageList);
-		listView.setAdapter(adapter);
 	}
 	
 	public void refreshMessageList() {
@@ -199,20 +255,34 @@ public class MainActivity extends Activity implements OnClickListener {
 					in.close();
 					
 					try {
-						JSONObject json = new JSONObject(str.toString());
-
-						String[] messages = new String[json.length()];
+						final JSONObject json = new JSONObject(str.toString());
 						
-						Iterator<String> jsonIterator = json.keys();
-						int index = 0;
-						while(jsonIterator.hasNext()) {
-							messages[index++] = json.getJSONObject(jsonIterator.next()).get("sender").toString();
-						}
-						
-						messageList = messages;
-						populateMessageList();
-						
-						
+						final Iterator<String> jsonIterator = json.keys();
+						runOnUiThread(new Runnable() {
+						     @Override
+						     public void run() {
+						    	 adapter.clear();
+						    	 int index = 0;
+									while(jsonIterator.hasNext()) {
+										//messages[index++] = json.getJSONObject(jsonIterator.next()).get("sender").toString();
+										try {
+											JSONObject msg = json.getJSONObject(jsonIterator.next());
+											MessageInfo msgInfo = new MessageInfo(msg.getString("sender"),
+																                  userId,
+																                  msg.getString("msg"),
+																                  msg.getString("url"),
+																                  msg.getInt("start_time"),
+																                  msg.getInt("length"));
+											adapter.add(msgInfo);
+										} catch (JSONException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									}
+									Log.i("ADAPTER", Integer.toString(adapter.getCount()));
+									adapter.notifyDataSetChanged();
+						     }
+						});
 						
 
 					} catch (JSONException e) {
@@ -313,5 +383,14 @@ public class MainActivity extends Activity implements OnClickListener {
 					});
 			return builder.create();
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		Intent songPlayIntent = new Intent(this, SongPlayActivity.class);
+		songPlayIntent.putExtra("vidId", adapter.getItem(position).getUrl());
+		songPlayIntent.putExtra("startTime", adapter.getItem(position).getStartTime());
+		songPlayIntent.putExtra("length", adapter.getItem(position).getLength());
+		startActivity(songPlayIntent);
 	}
 }
