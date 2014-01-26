@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -42,7 +41,7 @@ public class SongPlayActivity extends YouTubeBaseActivity implements
 		playButton.setOnClickListener(this);
 		
 		youtubeView = (YouTubePlayerView) findViewById(R.id.youtubeplayer);
-		youtubeView.initialize("AIzaSyB2iYmJiz1VhQH9RqcMOrEy6H4DGgS7n54", this);
+		youtubeView.initialize(MainActivity.DEVELOPER_ID, this);
 	}
 
 	@Override

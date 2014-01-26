@@ -6,5 +6,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="message">The quick brown fox...</string>
     <string name="title_activity_song_play">SongPlayActivity</string>
+    <string name="username">user name</string>
+    <string name="email">email</string>
+    <string name="title_activity_song_slice">SongSliceActivity</string>
 
 </resources>

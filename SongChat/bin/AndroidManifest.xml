@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="18" />
 
     <application
@@ -18,19 +18,21 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name="edu.rice.harger.songchat.SongPlayActivity"
             android:label="@string/title_activity_song_play" >
-     
-            
         </activity>
-        
+        <activity
+            android:name="edu.rice.harger.songchat.SongSliceActivity"
+            android:label="@string/title_activity_song_slice" >
+        </activity>
     </application>
-    
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
-    
-    
+
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+
 </manifest>
