@@ -30,6 +30,10 @@
             android:name="edu.rice.harger.songchat.SongSliceActivity"
             android:label="@string/title_activity_song_slice" >
         </activity>
+        <activity
+            android:name="edu.rice.harger.songchat.PickSong"
+            android:label="@string/title_activity_pick_song" >
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" >

@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -76,6 +78,8 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		Intent intent = getIntent(); 
 		userId = intent.getStringExtra("userId");
 		friends = intent.getStringArrayExtra("friends");
+		String vidUrl = intent.getStringExtra("vidUrl");		
+		String vidTitle = intent.getStringExtra("vidTitle");
 		
 		toggleEndsButton = (Button) findViewById(R.id.toggle_button);
 		toggleEndsButton.setOnClickListener(this);
@@ -86,8 +90,19 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		videoUrl = (EditText) findViewById(R.id.video_url);
 		videoUrl.setOnEditorActionListener(this);
 		
+		String videoId= vidUrl.split("v=")[1];
+		videoId= videoId.split("&")[0];
+		Log.i("WHAT",videoId +" "+ vidUrl);
+		
+//		Pattern pattern = Pattern.compile("(\?v=|\/\d\/|\/embed\/|\/v\/|\.be\/)([a-zA-Z0-9\-\_]+)/");
+//		Matcher matcher = pattern.matcher(vidUrl);
+//		String videoId = matcher.group();
+		
+		videoUrl.setText(videoId);
+		
 		youtubeView = (YouTubePlayerView) findViewById(R.id.slice_player);
 		youtubeView.initialize(MainActivity.DEVELOPER_ID, this);
+		
 	}
 
 	@Override
@@ -151,7 +166,6 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 	@Override
 	public void onInitializationFailure(Provider provider,
 			YouTubeInitializationResult result) {
-		Toast.makeText(this, "Initialization Fail", Toast.LENGTH_LONG).show();
 	}
 
 	@Override
@@ -160,8 +174,8 @@ public class SongSliceActivity extends YouTubeBaseActivity implements
 		youtubePlayer = player;
 		youtubePlayer.setPlayerStateChangeListener(this);
 		youtubePlayer.setPlaybackEventListener(this);
-		Toast.makeText(this, "Initialization  Success", Toast.LENGTH_LONG)
-				.show();
+		youtubePlayer.cueVideo(videoUrl.getText().toString());
+
 	}
 
 	@Override

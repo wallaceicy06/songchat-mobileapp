@@ -74,10 +74,11 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.new_message:
-			sendNewMessage();
+			pickSong();
 			return true;
 		case R.id.refresh:
 			refreshMessageList();
+			populateFriends();
 			return true;
 		case R.id.add_friend:
 			AddFriendDialog dialog = AddFriendDialog.newInstance();
@@ -217,6 +218,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 					Log.d("Http Response:", userId);
 					
 					populateFriends();
+					refreshMessageList();
 
 				} catch (ClientProtocolException e) {
 					// writing exception to log
@@ -330,10 +332,14 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							if(username.getText().length() > 0 && email.getText().length() > 0) {
 							((MainActivity) getActivity())
 									.loginWithCredentials(username.getText()
 											.toString(), email.getText()
 											.toString());
+							} else {
+								((MainActivity) getActivity()).repeatLogin();
+							}
 						}
 					});
 			builder.setNegativeButton("Cancel",
@@ -341,11 +347,16 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-
+							((MainActivity) getActivity()).repeatLogin();
 						}
 					});
 			return builder.create();
 		}
+	}
+	
+	public void repeatLogin() {
+		LoginDialog loginDialog = LoginDialog.newInstance();
+		loginDialog.show(getFragmentManager(), "dialog");
 	}
 	
 	public static class AddFriendDialog extends DialogFragment {
@@ -392,5 +403,14 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		songPlayIntent.putExtra("startTime", adapter.getItem(position).getStartTime());
 		songPlayIntent.putExtra("length", adapter.getItem(position).getLength());
 		startActivity(songPlayIntent);
+	}
+	
+	public void pickSong()
+	{
+		Intent intent = new Intent(this, PickSong.class);
+		intent.putExtra("userId", userId);
+		intent.putExtra("friends", friends);
+		startActivity(intent);
+		
 	}
 }

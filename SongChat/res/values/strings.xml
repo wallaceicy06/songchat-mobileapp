@@ -9,5 +9,6 @@
     <string name="username">user name</string>
     <string name="email">email</string>
     <string name="title_activity_song_slice">SongSliceActivity</string>
+    <string name="title_activity_pick_song">PickSong</string>
 
 </resources>
